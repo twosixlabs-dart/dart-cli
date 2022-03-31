@@ -1,0 +1,5 @@
+{
+    "cmd": "dart",
+    "name": "dart-cli",
+    "version": "3.0.0"
+}
