@@ -16,7 +16,7 @@ jobs:
           pip install .
           pytest
 
-  publish-to-sonatype:
+  publish-to-pypi:
 #    if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') }}
     needs: build
     runs-on: ubuntu-latest
@@ -30,13 +30,12 @@ jobs:
         run: |
           pip install twine wheel
           pip install .
-      - name: publish-to-sonatype
-        run: |
-          python scripts/manage_version.py update-version
-          scripts/publish.sh
+      - name: publish-to-pypi
+        run: scripts/publish.sh
         env:
           PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
           PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          GITHUB_SHA: ${{ github.sha }}
 
   tag-release:
     if: ${{ github.ref == 'refs/heads/master' }}
