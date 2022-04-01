@@ -17,7 +17,7 @@ jobs:
           pytest
 
   publish-to-pypi:
-#    if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') }}
+    if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') }}
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -49,4 +49,4 @@ jobs:
         uses: twosixlabs-dart/dart-tag-release@v3.0.34
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          release_version: ${{ format('3.0.{0}', github.run_number) }}
+          release_version: ${{ format('2.0.{0}', github.run_number) }}
