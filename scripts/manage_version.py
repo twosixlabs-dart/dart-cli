@@ -15,17 +15,19 @@ setup_path = project_dir.joinpath(setup_name)
 
 
 @click.command(name='update-version')
-def update_version():
+@click.argument('post-fix', required=False, default='')
+def update_version(post_fix: str):
     """Update setup.py version from app.version"""
     with open(app_version_path, 'r') as app_version_file:
         app_version = app_version_file.read().strip()
-        # Leave the setup version alone if latest
-        if app_version == 'latest':
-            return
-
         with open(setup_path, 'r+t') as setup_file:
             setup_data = json.loads(setup_file.read())
-            setup_data['version'] = app_version
+            setup_version = setup_data['version']
+            if app_version == 'latest':
+                new_setup_version = setup_version + post_fix
+            else:
+                new_setup_version = app_version + post_fix
+            setup_data['version'] = new_setup_version
             setup_file.seek(0)
             setup_file.write(json.dumps(setup_data, indent=4))
             setup_file.truncate()
