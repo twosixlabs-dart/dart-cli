@@ -49,4 +49,4 @@ jobs:
         uses: twosixlabs-dart/dart-tag-release@v3.0.34
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          release_version: ${{ format('2.0.{0}', github.run_number) }}
+          release_version: ${{ format('3.1.{0}', github.run_number) }}
