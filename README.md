@@ -1,6 +1,7 @@
 # DART command-line interface
 
-dart-cli aims to unite all frequently-used DART utilities into a single command-line application
+dart-cli provides a command-line interface for all of DART's REST services, as well as a host of other 
+utilities related to deployment and debugging.
 
 ## Install
 

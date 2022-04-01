@@ -27,9 +27,11 @@ install_requires = [
 setup(
     name=setup_data['name'],
     version=setup_data['version'],
-    description='Command line interface with DART services',
+    description='Data Acquisition and Reason Toolkit (DART) command-line interface',
+    long_description='dart-cli provides a command-line interface for all of DART\'s REST services, as well as a host of other utilities related to deployment and debugging.',
     author='John Hungerford',
-    author_email='john.hungerford@twosixlabs.com',
+    author_email='john.hungerford@twosixtech.com',
+    url="https://github.com/twosixlabs-dart/dart-cli",
     package_dir={'': 'src'},
     packages=find_packages('src'),
     py_modules=['dart', 'common_options', 'dart_context'],
@@ -41,4 +43,9 @@ setup(
     setup_requires=['pytest-runner'],
     tests_require=tests_require,
     include_package_data=True,
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: GNU Affero General Public License v3",
+        "Programming Language :: Python :: 3.9",
+    ],
 )
