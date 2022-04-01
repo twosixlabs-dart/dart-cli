@@ -21,7 +21,7 @@ def update_version(snapshot: bool):
     """Update setup.py version from app.version"""
     if snapshot:
         ts = datetime.now()
-        post_fix = f'-{ts.year}.{ts.month}.{ts.day}.{ts.hour}.{ts.minute}.{ts.second}'
+        post_fix = f'.{ts.year}.{ts.month}.{ts.day}.{ts.hour}.{ts.minute}.{ts.second}'
     else:
         post_fix = ''
 
