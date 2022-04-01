@@ -1,84 +1,50 @@
 #!/usr/bin/env python3
 import json
 import os
+from datetime import datetime
 from pathlib import Path
 import click
 
-sbt_name = 'version.sbt'
 this_dir = os.path.dirname(os.path.realpath(__file__))
 project_dir = Path(this_dir).parent
-sbt_path = project_dir.joinpath(sbt_name)
+
+app_version_name = 'app.version'
+app_version_path = project_dir.joinpath(app_version_name)
 
 setup_name = 'setup_data.json'
 setup_path = project_dir.joinpath(setup_name)
 
-def parse_version(sbt_string: str):
-    # version.sbt format is: 'version in ThisBuild := "1.0-SNAPSHOT"'
-    [_, raw_version] = sbt_string.split(':=')
-    return raw_version.strip('" ')
 
-def gen_version(setup_version: str):
-    if len(setup_version.split('.')) >= 3:
-        return f'version in ThisBuild := "{gen_latest(setup_version)}"'
+@click.command(name='update-version')
+@click.option('--snapshot', required=False, flag_value=True, default=False)
+def update_version(snapshot: bool):
+    """Update setup.py version from app.version"""
+    if snapshot:
+        ts = datetime.now()
+        post_fix = f'.{ts.year}.{ts.month}.{ts.day}.{ts.hour}.{ts.minute}.{ts.second}'
+    else:
+        post_fix = ''
 
-    return f'version in ThisBuild := "{setup_version}"'
-
-def gen_latest(setup_version: str):
-    split_version = setup_version.split('.')
-    return '.'.join(split_version[:2]) + '-SNAPSHOT'
-
-@click.command(name='from-sbt')
-def from_sbt():
-    """Populate setup.py version with version from version.sbt"""
-    with open(sbt_path, 'rt') as sbt_file:
-        sbt_string = sbt_file.read()
-        sbt_version = parse_version(sbt_string)
+    with open(app_version_path, 'r') as app_version_file:
+        app_version = app_version_file.read().strip()
         with open(setup_path, 'r+t') as setup_file:
             setup_data = json.loads(setup_file.read())
-            setup_data['version'] = sbt_version
+            setup_version = setup_data['version']
+            if app_version == 'latest':
+                new_setup_version = setup_version + post_fix
+            else:
+                new_setup_version = app_version + post_fix
+            setup_data['version'] = new_setup_version
             setup_file.seek(0)
             setup_file.write(json.dumps(setup_data, indent=4))
             setup_file.truncate()
 
 
-@click.command(name='to-sbt')
-def to_sbt():
-    """Populate version.sbt with setup.py version"""
-    with open(setup_path, 'rt') as setup_file:
-        setup_data = json.loads(setup_file.read())
-        setup_version = setup_data['version']
-        with open(sbt_path, 'wt') as sbt_file:
-            sbt_file.write(gen_version(setup_version))
-
-@click.command(name='set-latest')
-def set_latest():
-    """Make setup.py version X.X-SNAPSHOT"""
-    with open(setup_path, 'r+t') as setup_file:
-        setup_data = json.loads(setup_file.read())
-        setup_version = setup_data['version']
-        setup_data['version'] = gen_latest(setup_version)
-        setup_file.seek(0)
-        setup_file.write(json.dumps(setup_data, indent=4))
-        setup_file.truncate()
-
-@click.command(name='set-version')
-@click.argument('version', required=True)
-def set_version(version):
-    """Update setup.py version"""
-    with open(setup_path, 'r+t') as setup_file:
-        setup_data = json.loads(setup_file.read())
-        setup_data['version'] = version
-        setup_file.seek(0)
-        setup_file.write(json.dumps(setup_data, indent=4))
-        setup_file.truncate()
-
 @click.group()
 def cli():
-    """Move version from setup.py to version.sbt and vice versa"""
+    """Manage versions for publication"""
 
-cli.add_command(from_sbt)
-cli.add_command(to_sbt)
-cli.add_command(set_latest)
-cli.add_command(set_version)
+
+cli.add_command(update_version)
 
 cli()
