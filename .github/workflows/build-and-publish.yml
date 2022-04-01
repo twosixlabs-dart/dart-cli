@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: 3.9
       - name: install publication tools
-        run |
+        run: |
           pip install twine wheel
       - name: publish-to-sonatype
         run: |
