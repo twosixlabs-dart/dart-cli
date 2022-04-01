@@ -29,6 +29,7 @@ jobs:
       - name: install publication tools
         run: |
           pip install twine wheel
+          pip install .
       - name: publish-to-sonatype
         run: |
           python scripts/manage_version.py update-version
