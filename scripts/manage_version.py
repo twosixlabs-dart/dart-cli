@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+from datetime import datetime
 from pathlib import Path
 import click
 
@@ -15,9 +16,15 @@ setup_path = project_dir.joinpath(setup_name)
 
 
 @click.command(name='update-version')
-@click.argument('post-fix', required=False, default='')
-def update_version(post_fix: str):
+@click.option('--snapshot', required=False, flag_value=True, default=False)
+def update_version(snapshot: bool):
     """Update setup.py version from app.version"""
+    if snapshot:
+        ts = datetime.now()
+        post_fix = f'-{ts.year}.{ts.month}.{ts.day}.{ts.hour}.{ts.minute}.{ts.second}'
+    else:
+        post_fix = ''
+
     with open(app_version_path, 'r') as app_version_file:
         app_version = app_version_file.read().strip()
         with open(setup_path, 'r+t') as setup_file:

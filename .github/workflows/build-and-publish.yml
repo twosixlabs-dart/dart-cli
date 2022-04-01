@@ -35,7 +35,6 @@ jobs:
         env:
           PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
           PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-          GITHUB_SHA: ${{ github.sha }}
 
   tag-release:
     if: ${{ github.ref == 'refs/heads/master' }}
