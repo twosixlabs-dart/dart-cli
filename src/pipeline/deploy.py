@@ -23,8 +23,8 @@ def get_deploy_targets_from_provision_targets(targets):
     return deploy_targets
 
 
-def deploy(dart_context: DartContext, vm_username, ec2_ini_path, targets):
-    deploy_options = get_deploy_opts(dart_context, vm_username, ec2_ini_path)
+def deploy(dart_context: DartContext, ec2_ini_path, targets):
+    deploy_options = get_deploy_opts(dart_context, ec2_ini_path)
     unique_targets = set(targets)
     if 'core-pipeline' in unique_targets:
         unique_targets.discard('data')
@@ -87,7 +87,8 @@ def deploy(dart_context: DartContext, vm_username, ec2_ini_path, targets):
         return return_status
 
 
-def get_deploy_opts(dart_context: DartContext, vm_username, ec2_ini_path):
+def get_deploy_opts(dart_context: DartContext, ec2_ini_path):
+    vm_username = dart_context.dart_env.tst_env.ssh_user
     vm_username_opt = '' if vm_username is None else f' --vm_username {vm_username}'
     ec2_ini_path_opt = '' if ec2_ini_path is None else f' --ec2_ini_path {ec2_ini_path}'
     if dart_context.dart_env.env is None:

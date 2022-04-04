@@ -6,6 +6,7 @@ from dart_context.dart_environment.dart_environment_type import DartEnvironmentT
 
 class TstAwsDartEnvironmentType(DartEnvironmentType):
     image_prefix: str = None
+    ssh_user: str = None
     env: str = None
     aws_environment: str = None  # dart, prod
     deploy_profile: str = None  # Which profile is used by cdk (generally will be dart-distributed)
@@ -14,6 +15,9 @@ class TstAwsDartEnvironmentType(DartEnvironmentType):
 
     def set_image_prefix(self, ip):
         self.image_prefix = ip
+
+    def set_ssh_user(self, new_user) -> None:
+        self.ssh_user = new_user
 
     def set_env(self, e):
         self.env = e
@@ -36,6 +40,7 @@ class TstAwsDartEnvironmentType(DartEnvironmentType):
     def primitive_fields(self) -> dict[str, (Callable[[], any], Callable[[any], None])]:
         return {
             'image_prefix': (lambda: self.image_prefix, lambda x: self.set_image_prefix(x)),
+            'ssh-user': (lambda: self.ssh_user, lambda su: self.set_ssh_user(su)),
             'env': (lambda: self.env, lambda x: self.set_env(x)),
             'aws_environment': (lambda: self.aws_environment, lambda x: self.set_aws_environment(x)),
             'deploy_profile': (lambda: self.deploy_profile, lambda x: self.set_deploy_profile(x)),
