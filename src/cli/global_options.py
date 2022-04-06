@@ -111,10 +111,10 @@ def diab_version_option(f):
         if value is not None:
             state.dart_env.default_env.set_version(value)
         return value
-    return click.option('--diab-user',
+    return click.option('--diab-version',
                         is_eager=False,
                         expose_value=False,
-                        help='Set user for remote (ssh) deployment of Dart-in-a-Box.',
+                        help='Set Dart-in-a-Box version for deployment.',
                         callback=callback)(f)
 
 

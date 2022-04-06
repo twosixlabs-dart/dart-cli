@@ -95,7 +95,8 @@ class DefaultDartEnvironmentType(DartEnvironmentType):
 
     def service_base_url(self, service: str, direct: bool = False) -> str:
         host = self.host if self.host is not None else 'localhost'
-        return f'http://{host}:{self.service_port(service, direct)}{self.service_base_path(service, direct)}'
+        # return f'http://{host}:{self.service_port(service, direct)}{self.service_base_path(service, direct)}'
+        return f'http://{host}{self.service_base_path(service, direct)}'
 
     def sub_config_fields(self) -> dict[str, DartConfig]:
         return {}

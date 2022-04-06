@@ -6,7 +6,7 @@ from dart_context.dart_context import DartContext
 from cli.global_options import dart_options, pass_dart_context
 from pipeline.clean import clean_s3, get_opts, stop_containers_clear_data
 from pipeline.deploy import deploy, get_deploy_targets_from_provision_targets
-from pipeline.diab import deploy_diab
+from pipeline.diab import deploy_diab, stop_diab
 from pipeline.provision import provision, destroy, start_pipeline, stop_pipeline, info_pipeline
 
 
@@ -120,8 +120,10 @@ def start_command(dart_context : DartContext):
 @click.command(name='stop')
 @dart_options
 @pass_dart_context
-def stop_command(dart_context):
+def stop_command(dart_context: DartContext):
     """Stop all DART instances"""
+    if dart_context.dart_env.env_type() == 'default':
+        stop_diab()
     if dart_context.aws_profile is None:
         raise click.exceptions.MissingParameter( "missing aws profile: --aws-profile" )
     if dart_context.dart_env.env is None:
