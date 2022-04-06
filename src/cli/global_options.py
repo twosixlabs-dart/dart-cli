@@ -79,6 +79,45 @@ def remote_deployment_option(f):
                         callback=callback)(f)
 
 
+def tst_user_option(f):
+    def callback(ctx, param, value):
+        state: DartContext = ctx.ensure_object(DartContext)
+        if value is not None:
+            state.dart_env.tst_env.set_ssh_user(value)
+        return value
+    return click.option('--tst-user',
+                        is_eager=False,
+                        expose_value=False,
+                        help='Set user for remote (ssh) deployment of TST deployment environment.',
+                        callback=callback)(f)
+
+
+def diab_user_option(f):
+    def callback(ctx, param, value):
+        state: DartContext = ctx.ensure_object(DartContext)
+        if value is not None:
+            state.dart_env.default_env.set_user(value)
+        return value
+    return click.option('--diab-user',
+                        is_eager=False,
+                        expose_value=False,
+                        help='Set user for remote (ssh) deployment of Dart-in-a-Box.',
+                        callback=callback)(f)
+
+
+def diab_version_option(f):
+    def callback(ctx, param, value):
+        state: DartContext = ctx.ensure_object(DartContext)
+        if value is not None:
+            state.dart_env.default_env.set_version(value)
+        return value
+    return click.option('--diab-version',
+                        is_eager=False,
+                        expose_value=False,
+                        help='Set Dart-in-a-Box version for deployment.',
+                        callback=callback)(f)
+
+
 def local_deployment_option(f):
     def callback(ctx, param, value):
         state: DartContext = ctx.ensure_object(DartContext)
@@ -490,6 +529,9 @@ def dart_options(f):
     f = use_tst_env_option(f)
     f = use_custom_env_option(f)
     f = remote_deployment_option(f)
+    f = tst_user_option(f)
+    f = diab_user_option(f)
+    f = diab_version_option(f)
     f = local_deployment_option(f)
     f = aws_env_option(f)
     f = dart_secret_option(f)

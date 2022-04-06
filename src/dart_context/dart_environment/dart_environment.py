@@ -30,6 +30,15 @@ class DartEnvironment(DartEnvironmentType):
             return DEFAULT_DART_ENV_TYPE
         return self.__env_type
 
+    def is_default(self) -> bool:
+        return self.env_type() == DEFAULT_DART_ENV_TYPE
+
+    def is_tst(self) -> bool:
+        return self.env_type() == 'tst'
+
+    def is_custom(self) -> bool:
+        return self.env_type() == 'custom'
+
     def set_env_type(self, et: str) -> None:
         self.__env_type = et
 
