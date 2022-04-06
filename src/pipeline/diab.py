@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from dart_context.dart_context import DartContext
 
@@ -15,10 +16,26 @@ def compose_file_url(context: DartContext) -> str:
     return f'https://raw.githubusercontent.com/twosixlabs-dart/dart-in-the-box/{branch_segment}/dart-standalone.yml'
 
 
-def clean_command(data_root: str, user: str):
+def clean_command(data_root: str):
+    data_dir = f'{data_root}/data'
+    return f'sudo rm -rf {data_dir}'
+
+
+def initialize_data_command(data_root: str, user):
     data_dir = f'{data_root}/data'
     es_dirs = f'{data_dir}/dart-es-master {data_dir}/dart-es-replica-1 {data_dir}/dart-es-replica-2'
-    return f'rm -rf {data_dir}; mkdir -p {es_dirs}; chown -R {user}: {data_dir}'
+    return f'mkdir -p {es_dirs}; chown -R {user}: {data_dir}'
+
+
+def check_data_command(context: DartContext):
+    data_root = context.dart_env.default_env.data_dir if context.dart_env.default_env.data_dir is not None else '.'
+    data_dir = f'{data_root}/data'
+    return f'[ -d "{data_dir}" ] && [ -d  "{data_dir}/dart-es-master" ] && [ -d "{data_dir}/dart-es-replica-1" ] && [ -d "{data_dir}/dart-es-replica-2"]'
+
+
+def dc_up_command(context: DartContext):
+    proxy_host_str = f'PROXY_HOSTNAME={context.dart_env.default_env.host} ' if context.dart_env.default_env.host is not None else ''
+    return proxy_host_str + 'docker-compose up -d'
 
 
 def command_with_docker_compose(context: DartContext, cmd: str) -> str:
@@ -26,32 +43,45 @@ def command_with_docker_compose(context: DartContext, cmd: str) -> str:
     return f'cd {data_root}; rm -f docker-compose.yml; curl {compose_file_url(context)} --output docker-compose.yml; {cmd}; rm -f docker-compose.yml'
 
 
-def deploy_diab(context: DartContext, remote: bool, version: str = 'latest') -> None:
-    clean_diab(context, remote)
-    start_diab(context, remote)
+def deploy_diab(context: DartContext) -> None:
+    data_root = context.dart_env.default_env.data_dir if context.dart_env.default_env.data_dir is not None else '.'
+    user = context.dart_env.default_env.user if context.dart_env.default_env.user is not None else '$USER'
+    clean_cmd = clean_command(data_root)
+    init_cmd = initialize_data_command(data_root, user)
+    deploy_cmd = command_with_docker_compose(context, f'docker-compose down; {clean_cmd}; {init_cmd}; {dc_up_command(context)}')
+    execute(context, deploy_cmd)
 
 
-def start_diab(context: DartContext, remote: bool) -> None:
-    start_cmd = 'docker-compose up -d'
-    full_cmd = command_with_docker_compose(context, start_cmd)
-    execute(context, full_cmd, remote)
+def start_diab(context: DartContext) -> None:
+    check_cmd = check_data_command(context)
+    start_cmd = dc_up_command(context)
+    conditional_cmd = f'{check_cmd} && {start_cmd} || echo "Unable to start services: data directory is uninitialized"'
+    full_cmd = command_with_docker_compose(context, conditional_cmd)
+    execute(context, full_cmd)
 
 
-def stop_diab(context: DartContext, remote: bool, version: str = 'latest') -> None:
+def stop_diab(context: DartContext) -> None:
     stop_cmd = 'docker-compose down'
     full_cmd = command_with_docker_compose(context, stop_cmd)
-    execute(context, full_cmd, remote)
+    execute(context, full_cmd)
 
 
-def clean_diab(context: DartContext, remote: bool) -> None:
+def clean_diab(context: DartContext) -> None:
     data_root = context.dart_env.default_env.data_dir if context.dart_env.default_env.data_dir is not None else '.'
-    user = context.dart_env.default_env.user if context.dart_env.default_env.data_dir is not None else '$USER'
-    cmd = clean_command(data_root, user)
-    execute(context, cmd, remote)
+    cmd = clean_command(data_root)
+    execute(context, cmd)
 
 
-def execute(dart_context: DartContext, cmd: str, remote: bool) -> None:
-    if not remote:
+def destroy_diab(context: DartContext) -> None:
+    data_root = context.dart_env.default_env.data_dir if context.dart_env.default_env.data_dir is not None else '.'
+    clean_cmd = clean_command(data_root)
+    dc_down_cmd = 'docker-compose down'
+    destroy_cmd = command_with_docker_compose(context, f'{dc_down_cmd}; {clean_cmd}')
+    execute(context, destroy_cmd)
+
+
+def execute(dart_context: DartContext, cmd: str) -> None:
+    if dart_context.dart_env.default_env.host is None:
         command = cmd
     else:
         host = dart_context.dart_env.default_env.host

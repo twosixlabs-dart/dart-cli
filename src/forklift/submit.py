@@ -147,6 +147,7 @@ def upload_file(file_path: str, service_url: str, auth_headers: {}, metadata: st
             'file': (file.name, file),
             'metadata': (None, metadata, 'application/json')
         }
+        print(f'POSTING TO {service_url}')
         return try_post(url=service_url, post_files=post_files, sleep_time=0.2, numtimes=1, headers=auth_headers)
 
 

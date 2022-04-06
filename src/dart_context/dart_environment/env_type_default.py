@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Optional
 
 from dart_context.dart_config import DartConfig
 from dart_context.dart_environment.dart_environment_type import DartEnvironmentType
@@ -29,23 +29,18 @@ class DefaultDartEnvironmentType(DartEnvironmentType):
 
     __service_map = {
         'corpex': {
-            'port': 8088,
         },
         'forklift': {
-            'port': 8091,
         },
         'cdr-retrieval': {
-            'port': 8090,
             'base_name': 'cdrs',
             'container': 'cdr-retrieval',
         },
         'readers-output': {
-            'port': 13337,
             'base_name': 'readers',
             'container': 'reader-output',
         },
         'tenants': {
-            'port': 8080,
             'container': 'dart-tenants',
         },
         # 'reprocess': {
@@ -65,7 +60,7 @@ class DefaultDartEnvironmentType(DartEnvironmentType):
         },
         'elasticsearch': {
             'port': 9200,
-            'container': 'dart-es',
+            'container': 'dart-es-master',
         },
         'arango': {
             'port': 8529,
@@ -83,8 +78,11 @@ class DefaultDartEnvironmentType(DartEnvironmentType):
             return 'localhost'
         return self.host
 
-    def service_port(self, service: str, direct: bool = False) -> int:
-        return self.__service_map[service]['port']
+    def service_port(self, service: str, direct: bool = False) -> Optional[int]:
+        if service in self.__service_map:
+            if 'port' in self.__service_map[service]:
+                return self.__service_map[service]['port']
+        return None
 
     def service_base_path(self, service: str, direct: bool = False) -> str:
         base_name = service if 'base_path' not in self.__service_map[service] else self.__service_map[service]['base_name']
@@ -95,8 +93,9 @@ class DefaultDartEnvironmentType(DartEnvironmentType):
 
     def service_base_url(self, service: str, direct: bool = False) -> str:
         host = self.host if self.host is not None else 'localhost'
-        # return f'http://{host}:{self.service_port(service, direct)}{self.service_base_path(service, direct)}'
-        return f'http://{host}{self.service_base_path(service, direct)}'
+        port = self.service_port(service, direct)
+        port_str = '' if port is None else f':{port}'
+        return f'http://{host}{port_str}{self.service_base_path(service, direct)}'
 
     def sub_config_fields(self) -> dict[str, DartConfig]:
         return {}
