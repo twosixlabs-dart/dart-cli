@@ -30,7 +30,7 @@ def initialize_data_command(data_root: str, user):
 def check_data_command(context: DartContext):
     data_root = context.dart_env.default_env.data_dir if context.dart_env.default_env.data_dir is not None else '.'
     data_dir = f'{data_root}/data'
-    return f'[ -d "{data_dir}" ] && [ -d  "{data_dir}/dart-es-master" ] && [ -d "{data_dir}/dart-es-replica-1" ] && [ -d "{data_dir}/dart-es-replica-2"]'
+    return f'[ -d "{data_dir}" ] && [ -d  "{data_dir}/dart-es-master" ] && [ -d "{data_dir}/dart-es-replica-1" ] && [ -d "{data_dir}/dart-es-replica-2" ]'
 
 
 def dc_up_command(context: DartContext):
