@@ -37,7 +37,7 @@ jobs:
           PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
 
   publish-to-docker-hub:
-    if: ${{ github.ref == 'refs/heads/master' || github.ref == 'DART-1392-dockerize' }}
+    if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/DART-1392-dockerize' }}
     runs-on: ubuntu-latest
     needs: build
     steps:
