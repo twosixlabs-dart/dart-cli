@@ -36,6 +36,9 @@ def dc_up_command(context: DartContext):
     proxy_host_str = f'PROXY_HOSTNAME={context.dart_env.default_env.host} ' if context.dart_env.default_env.host is not None else ''
     return proxy_host_str + 'docker-compose up -d'
 
+def dc_pull_command():
+    return 'docker-compose pull'
+
 
 def command_with_docker_compose(context: DartContext, cmd: str) -> str:
     data_root = context.dart_env.default_env.data_dir if context.dart_env.default_env.data_dir is not None else '.'
@@ -53,7 +56,7 @@ def deploy_diab(context: DartContext) -> None:
 
 def start_diab(context: DartContext) -> None:
     check_cmd = check_data_command(context)
-    start_cmd = dc_up_command(context)
+    start_cmd = f'{dc_pull_command()} && {dc_up_command(context)}'
     conditional_cmd = f'{check_cmd} && {start_cmd} || echo "Unable to start services: data directory is uninitialized"'
     full_cmd = command_with_docker_compose(context, conditional_cmd)
     execute(context, full_cmd)

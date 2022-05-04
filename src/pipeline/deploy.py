@@ -91,22 +91,22 @@ def get_deploy_opts(dart_context: DartContext, ec2_ini_path):
     vm_username = dart_context.dart_env.tst_env.ssh_user
     vm_username_opt = '' if vm_username is None else f' --vm_username {vm_username}'
     ec2_ini_path_opt = '' if ec2_ini_path is None else f' --ec2_ini_path {ec2_ini_path}'
-    if dart_context.dart_env.env is None:
+    if dart_context.dart_env.tst_env.env is None:
         raise Exception('missing DART environment: provide with --env or config profiles')
-    if dart_context.docker_un is None:
-        raise Exception('missing docker username: provide with --docker_commands-auth or config profiles')
-    if dart_context.docker_pw is None:
-        raise Exception('missing docker password: provide with --docker_commands-auth or config profiles')
+    if dart_context.docker_config.docker_username is None:
+        raise Exception('missing docker username: provide with --docker-username or config profiles')
+    if dart_context.docker_config.docker_password is None:
+        raise Exception('missing docker password: provide with --docker-password or config profiles')
     if dart_context.aws_profile is None:
-        raise Exception('missing AWS profiles: provide with --aws-profiles or add to config')
+        raise Exception('missing AWS profiles: provide with --aws-profile or add to config')
     if dart_context.ssh_key is None:
         raise Exception('missing ssh key path : provide with --ssh-key or add to config')
 
-    docker_registry_username_opt = f' --docker_registry_username {dart_context.docker_un}'
-    docker_registry_password_opt = f' --docker_registry_password {dart_context.docker_pw}'
+    docker_registry_username_opt = f' --docker_registry_username {dart_context.docker_config.docker_username}'
+    docker_registry_password_opt = f' --docker_registry_password {dart_context.docker_config.docker_password}'
     aws_profile_opt = f' --aws_profile {dart_context.aws_profile}'
     ssh_key_path_opt = f' --ssh_key_path /root/.ssh/{dart_context.ssh_key}'
-    deploy_env_opt = f' --deploy_env {dart_context.dart_env.env}'
+    deploy_env_opt = f' --deploy_env {dart_context.dart_env.tst_env.env}'
 
     return vm_username_opt \
         + ec2_ini_path_opt \

@@ -76,7 +76,7 @@ def refresh_command(dart_context: DartContext, vm_username, ec2_ini_path, save_r
     if not save_raws:
         status = clean_s3(dart_context, get_opts(dart_context, True))
     if status:
-        if stop_containers_clear_data(dart_context, vm_username, ec2_ini_path):
+        if stop_containers_clear_data(dart_context, ec2_ini_path):
             if not deploy(dart_context, ec2_ini_path, 'all'):
                 print('Redeployment of services failed')
         else:
@@ -103,7 +103,7 @@ def provision_deploy_command(dart_context: DartContext, vm_username, ec2_ini_pat
     if provision_success:
         deploy_targets = get_deploy_targets_from_provision_targets(targets)
         print(deploy_targets)
-        deploy(dart_context, vm_username, ec2_ini_path, deploy_targets)
+        deploy(dart_context, ec2_ini_path, deploy_targets)
     else:
         print('Provision failed -- cancelling deployment')
 
@@ -122,7 +122,7 @@ def destroy_command(dart_context: DartContext, targets):
     if len(targets) == 0:
         targets = ['all']
 
-    print(f'Warning! Running this command will remove all service infrastructure in {dart_context.dart_env.env}')
+    print(f'Warning! Running this command will remove all service infrastructure in {dart_context.dart_env.tst_env.env}')
     res = input('Do you wish to proceed (n/Y)   ')
     if res != 'Y':
         print('aborting...')
@@ -140,7 +140,7 @@ def start_command(dart_context : DartContext):
 
     if dart_context.aws_profile is None:
         raise click.exceptions.MissingParameter( "missing aws profile: --aws-profile" )
-    if dart_context.dart_env.env is None:
+    if dart_context.dart_env.tst_env.env is None:
         raise click.exceptions.MissingParameter( "missing DART environment: --env/-e" )
     start_pipeline(dart_context)
 
@@ -158,7 +158,7 @@ def stop_command(dart_context: DartContext):
 
     if dart_context.aws_profile is None:
         raise click.exceptions.MissingParameter( "missing aws profile: --aws-profile" )
-    if dart_context.dart_env.env is None:
+    if dart_context.dart_env.tst_env.env is None:
         raise click.exceptions.MissingParameter( "missing DART environment: --env/-e" )
     stop_pipeline(dart_context)
 
@@ -173,7 +173,7 @@ def info_command(dart_context: DartContext):
 
     if dart_context.aws_profile is None:
         raise click.exceptions.MissingParameter( "missing aws profile: --aws-profile" )
-    if dart_context.dart_env.env is None:
+    if dart_context.dart_env.tst_env.env is None:
         raise click.exceptions.MissingParameter( "missing DART environment: --env/-e" )
     info_pipeline(dart_context)
 
@@ -190,7 +190,7 @@ def clean_command(dart_context, no_prompt):
         raise DartConfigException(f'clean not supported for {dart_context.dart_env.env_type()} deployment. Only default and TST deployment environments can be cleaned.')
 
     if not no_prompt:
-        print(f'Warning! Running this command will delete all stored raw documents and upload metadata in {dart_context.dart_env.env}')
+        print(f'Warning! Running this command will delete all stored raw documents and upload metadata in {dart_context.dart_env.tst_env.env}')
         res = input('Do you wish to proceed (n/Y)   ')
         if res != 'Y':
             print('aborting...')
