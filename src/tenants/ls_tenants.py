@@ -12,7 +12,7 @@ from cli.global_options import dart_options, pass_dart_context
 @click.command(name='ls')
 @dart_options
 @pass_dart_context
-def command(context : DartContext):
+def command(context: DartContext):
     """Display all tenants"""
     base_url  = get_base_url('tenants', context)
     auth_headers = generate_auth_headers(context)

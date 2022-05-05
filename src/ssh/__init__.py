@@ -12,7 +12,7 @@ from ssh.ssh import open_ssh
 @pass_dart_context
 def command(ctx: DartContext, node):
     """Open a secure shell session with a DART node"""
-    if ctx.dart_env.default_env:
+    if ctx.dart_env.is_default():
         return open_ssh(ctx, '')
 
     if node is None:

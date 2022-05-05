@@ -10,20 +10,21 @@ from dart_context.dart_context import DartContext
 
 def get_docker_client(dart_context: DartContext):
     client: docker.DockerClient = docker.client.from_env()
-    if dart_context.docker_pw is not None and dart_context.docker_un is not None:
+    if dart_context.docker_config.docker_password is not None and dart_context.docker_config.docker_username is not None:
         print('Logging into docker')
-        registry_host = dart_context.docker_registry_host
-        client.login(username=dart_context.docker_un,
-                     password=dart_context.docker_pw,
+        registry_host = dart_context.docker_config.docker_registry_host
+        client.login(username=dart_context.docker_config.docker_username,
+                     password=dart_context.docker_config.docker_password,
                      registry=registry_host)
 
     return client
+
 
 def get_dart_image(dart_context: DartContext):
     if dart_context.dart_env.tst_env.project_id is None or dart_context.dart_env.tst_env.pipeline_version is None:
         raise MissingParameterException('dart-version (including project-id and pipeline-version)')
 
-    image_prefix = f'{dart_context.docker_registry_host}{dart_context.docker_namespace}/'
+    image_prefix = f'{dart_context.docker_config.docker_registry_host}/{dart_context.docker_config.docker_namespace}/'
     wm_image = 'wm-dart-pipeline'
     dev_image = 'dev-dart-pipeline'
     if dart_context.dart_env.tst_env.project_id == 'wm':
@@ -34,6 +35,7 @@ def get_dart_image(dart_context: DartContext):
         raise click.BadOptionUsage('dart-version', 'Allowed values for project-id are wm|dev')
 
     return image_prefix + image + ':' + dart_context.dart_env.tst_env.pipeline_version
+
 
 def run_dart_docker_command(dart_context: DartContext, working_dir, command):
     client: docker.DockerClient = get_docker_client(dart_context)
