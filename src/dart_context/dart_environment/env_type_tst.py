@@ -115,12 +115,6 @@ class TstAwsDartEnvironmentType(DartEnvironmentType):
             'type': 'dart',
             'container': 'daydream-nation',
         },
-        'cdr-aggregation': {
-            'instance': 'rest',
-            'port': 8091,
-            'type': 'dart',
-            'container': 'corpex',
-        },
         'ladle': {
             'instance': 'streaming',
             'port': 8080,
@@ -132,6 +126,7 @@ class TstAwsDartEnvironmentType(DartEnvironmentType):
             'proxied': True,
             'type': 'dart',
             'container': 'readers-output',
+            'path_name': 'readers',
         },
         'postgres': {
             'instance': 'data-master',
@@ -151,6 +146,14 @@ class TstAwsDartEnvironmentType(DartEnvironmentType):
             'proxied': True,
             'type': 'dart',
             'container': 'dart-tenants',
+        },
+        'ontologies': {
+            'instance': 'rest',
+            'port': 8084,
+            'proxied': True,
+            'container': 'ontology-registry',
+            'path': 'ontologies',
+            'type': 'dart',
         },
         'users': {
             'instance': 'rest',

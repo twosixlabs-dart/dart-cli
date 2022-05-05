@@ -121,7 +121,7 @@ def get_raws(dart_context: DartContext, output, ids_file, doc_ids):
 
     def url(doc_id):
         suffix = '' if len(dart_context.tenants()) < 1 else f'?tenant_id={dart_context.tenants()[0]}'
-        return base_url + '/dart/api/v1/cdrs/raw/' + doc_id + suffix
+        return base_url + '/raw/' + doc_id + suffix
 
     for doc_id in all_doc_ids:
         with requests.get(url(doc_id), stream=True, headers=auth_headers) as response:

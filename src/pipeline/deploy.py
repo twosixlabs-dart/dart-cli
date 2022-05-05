@@ -1,90 +1,12 @@
 import click
 
 from dart_context.dart_context import DartContext
-from pipeline.parameter_data import provision_to_deploy_targets_map
 from utilities.docker_utils import run_dart_docker_command
 
 
-def deploy_default(version: str) -> None:
-    """Retrieve and stand up dart-in-a-box"""
-    pass
-
-
-def stop_default(version: str) -> None:
-    """Stop a running dart-in-a-box deployment"""
-    pass
-
-
-def get_deploy_targets_from_provision_targets(targets):
-    deploy_targets = set()
-    provision_targets = set(targets)
-    for target in provision_targets:
-        deploy_targets = deploy_targets.union(provision_to_deploy_targets_map[target])
-    return deploy_targets
-
-
-def deploy(dart_context: DartContext, ec2_ini_path, targets):
+def deploy(dart_context: DartContext, ec2_ini_path):
     deploy_options = get_deploy_opts(dart_context, ec2_ini_path)
-    unique_targets = set(targets)
-    if 'core-pipeline' in unique_targets:
-        unique_targets.discard('data')
-        unique_targets.discard('data-master')
-        unique_targets.discard('data-workers')
-        unique_targets.discard('rest')
-        unique_targets.discard('streaming')
-    if 'pipeline' in unique_targets:
-        unique_targets.discard('core-pipeline')
-        unique_targets.discard('data')
-        unique_targets.discard('data-master')
-        unique_targets.discard('data-workers')
-        unique_targets.discard('rest')
-        unique_targets.discard('streaming')
-    if 'data' in unique_targets:
-        unique_targets.discard('data-master')
-        unique_targets.discard('data-workers')
-    if 'batch' in unique_targets:
-        unique_targets.discard('batch-master')
-        unique_targets.discard('batch-workers')
-    if 'all' in unique_targets:
-        return deploy_all(dart_context, deploy_options)
-    else:
-        return_status = True
-        for target in unique_targets:
-            if target == 'pipeline':
-                if not deploy_pipeline(dart_context, deploy_options):
-                    return_status = False
-            if target == 'core-pipeline':
-                if not deploy_core_pipeline(dart_context, deploy_options):
-                    return_status = False
-            if target == 'analytics':
-                if not deploy_analytics(dart_context, deploy_options):
-                    return_status = False
-            if target == 'batch':
-                if not deploy_batch(dart_context, deploy_options):
-                    return_status = False
-            if target == 'batch-master':
-                if not deploy_batch_master(dart_context, deploy_options):
-                    return_status = False
-            if target == 'batch-workers':
-                if not deploy_batch_workers(dart_context, deploy_options):
-                    return_status = False
-            if target == 'data':
-                if not deploy_data(dart_context, deploy_options):
-                    return_status = False
-            if target == 'data-master':
-                if not deploy_data_master(dart_context, deploy_options):
-                    return_status = False
-            if target == 'data-workers':
-                if not deploy_data_workers(dart_context, deploy_options):
-                    return_status = False
-            if target == 'rest':
-                if not deploy_rest(dart_context, deploy_options):
-                    return_status = False
-            if target == 'streaming':
-                if not deploy_streaming(dart_context, deploy_options):
-                    return_status = False
-
-        return return_status
+    return deploy_pipeline(dart_context, deploy_options)
 
 
 def get_deploy_opts(dart_context: DartContext, ec2_ini_path):
@@ -117,16 +39,8 @@ def get_deploy_opts(dart_context: DartContext, ec2_ini_path):
         + deploy_env_opt
 
 
-def deploy_all(dart_context, deploy_options):
-    if deploy_pipeline(dart_context, deploy_options):
-        return deploy_batch(dart_context, deploy_options)
-    else:
-        return False
-
-
 def deploy_pipeline(dart_context, deploy_options):
-    if not deploy_core_pipeline(dart_context, deploy_options):
-        return False
+    return deploy_core_pipeline(dart_context, deploy_options)
 
 
 def deploy_core_pipeline(dart_context, deploy_options):

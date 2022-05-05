@@ -3,49 +3,14 @@ from utilities.docker_utils import run_dart_docker_command
 from dart_context.dart_context import DartContext
 
 
-def destroy(dart_context, targets):
-    unique_targets = set(targets)
+def destroy(dart_context):
     provision_opts = get_destroy_opts(dart_context)
-    if 'all' in unique_targets:
-        return destroy_all(dart_context, provision_opts)
-
-    return_status = True
-    for target in unique_targets:
-        if target == 'batch':
-            if not destroy_batch(dart_context, provision_opts):
-                return_status = False
-        if target == 'pipeline':
-            if not destroy_core_pipeline(dart_context, provision_opts):
-                return_status = False
-        if target == 'core_pipeline':
-            if not destroy_core_pipeline(dart_context, provision_opts):
-                return_status = False
-
-    return return_status
+    return destroy_all(dart_context, provision_opts)
 
 
-def provision(dart_context, targets):
-    unique_targets = set(targets)
+def provision(dart_context):
     provision_opts = get_provision_opts(dart_context)
-    if 'all' in unique_targets:
-        if provision_core(dart_context, provision_opts):
-            return provision_batch(dart_context, provision_opts)
-        else:
-            return False
-
-    return_status = True
-    for target in unique_targets:
-        if target == 'batch':
-            if not provision_batch(dart_context, provision_opts):
-                return_status = False
-        if target == 'pipeline':
-            if not provision_core(dart_context, provision_opts):
-                return_status = False
-        if target == 'core-pipeline':
-            if not provision_core(dart_context, provision_opts):
-                return_status = False
-
-    return return_status
+    return provision_core(dart_context, provision_opts)
 
 
 def get_provision_opts(dart_context: DartContext):
