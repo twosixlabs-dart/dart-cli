@@ -16,7 +16,7 @@ from cli.global_options import pass_dart_context, dart_options
 @click.option('-o', '--output', required=False)
 @pass_dart_context
 def get_cdr_archive(dart_context: DartContext, output):
-    base_url = get_base_url('cdr-archive', dart_context)
+    base_url = get_base_url('cdr-retrieval', dart_context)
     url = base_url + '/archive'
     output_path = output if output is not None else os.path.join(os.getcwd(), 'cdr-archive.zip')
     file_path = output_path
