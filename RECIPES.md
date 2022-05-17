@@ -6,7 +6,7 @@ This document provides the syntax for performing common DART tasks using the com
 
 The cli includes some root-level commands for accessing instances and docker services.
 
-### SSH (TST only)
+### SSH
 
 The `ssh` command provides a shortcut for opening a secure shell connection to an instance:
 
@@ -15,8 +15,10 @@ $ dart --ssh-key [KEY] -e [ENV_NAME] ssh [INSTANCE_NAME]
 ```
 e.g.,
 ```shell
-$ dart -p prod -e wm ssh data-master
+$ dart -p prod ssh data-master
 ```
+
+Note `INSTANCE_NAME` is not required for a standalone deployment (e.g., DIAB or CREATE).
 
 ### docker-debug
 
@@ -24,46 +26,34 @@ To connect directly to a container running on an instance, you can use the `debu
 which runs `docker exec -it` on an ssh connection:
 
 ```shell
-$ dart --ssh-key [KEY] -e [ENV_NAME] debug [SERVICE]
+$ dart --ssh-key [KEY] debug [SERVICE]
 ```
 e.g.,
 ```shell
-$ dart -p prod -e wm debug corpex
+$ dart -p prod debug corpex
 ```
 
-To see which services are supported, look in at `services.py` in the `data` package in this
-repository. The dict exported in that module maps instances and container names to each 
-service. To connect to a container not included in the `services` module, just use the 
-container name instead of the service name, and set the instance with `--instance` or `-i`.
+How this will be resolved will depend upon your deployment environment. For default deployments (DIAB or CREATE), 
+see `src/dart_context/dart_environment/env_type_default.py` to see what services are defined and how they are named.
 
-For instance, you can exec into the zookeeper containers on either the streaming node or
-the data node by doing the following:
-
-```shell
-$ dart -p prod -e wm debug zookeeper-1 -i data-master
-```
-or
-```shell
-$ dart -p prod -e wm debug zookeeper-1 -i streaming
-```
+Note that for remote deployments, `debug` will exec into running containers via ssh.
 
 ### docker logs
 
-You can get the docker logs of an instance using:
+You can get the docker logs of a service using:
 
 ```shell
-$ dart --ssh-key [KEY] -e [ENV_NAME] debug [SERVICE] [-f]
+$ dart --ssh-key [KEY] debug [SERVICE] [-f]
 ```
 
-You can manually set the instance and container name in the same manner as the `debug`
-command. To maintain a connection and follow the logs in real time, you can set the 
-`--follow` or `-f` flag:
+You can manually set the instance and container as well. To maintain a connection and follow the logs in real time, you 
+can set the `--follow` or `-f` flag:
 
 ```shell
-$ dart -p prod -e wm logs -f corpex
+$ dart -p prod logs -f corpex
 ```
 ```shell
-$ dart -p prod -e wm logs -f -i streaming zookeeper-1
+$ dart -p prod logs -f -i streaming zookeeper-1
 ```
 
 ### psql
@@ -71,7 +61,7 @@ $ dart -p prod -e wm logs -f -i streaming zookeeper-1
 You can access an environment's postgres database as follows:
 
 ```shell
-$ dart -p prod -e wm psql
+$ dart -p prod psql
 ```
 
 This will connect you to the `dart_db` database as a root user.
@@ -83,7 +73,7 @@ This will connect you to the `dart_db` database as a root user.
 To upload individual files:
 
 ```shell
-$ dart -p prod -e wm \
+$ dart -p prod \
        forklift submit \
           --tenant "tenant1" \
           --tenant "tenant2" \
@@ -96,7 +86,7 @@ $ dart -p prod -e wm \
 To upload a directory and failed uploads to a separate directory:
 
 ```shell
-$ dart -p prod -e wm \
+$ dart -p prod \
        forklift submit \
           --tenant "tenant1" \
           --tenant "tenant2" \
@@ -110,7 +100,7 @@ You can then try to upload the failed documents again, moved success back to the
 directory:
 
 ```shell
-$ dart -p prod -e wm \
+$ dart -p prod \
        forklift submit \
           --tenant "tenant1" \
           --tenant "tenant2" \
@@ -125,7 +115,7 @@ $ dart -p prod -e wm \
 To set the metadata for the uploads using a json string:
 
 ```shell
-$ dart -p prod -e wm \
+$ dart -p prod \
        forklift submit \
           --metadata '{"tenants":["tenant-1","tenant-2],"labels":["some label"]}'
           --input-dir /path/to/files
@@ -135,7 +125,7 @@ To use metadata from a file:
 
 ```shell
 $ echo '{"tenants":["tenant-1","tenant-2],"labels":["some label"]}' > metadata.json
-$ dart -p prod -e wm \
+$ dart -p prod \
        forklift submit \
           --metadata-file metadata.json
           --input-dir /path/to/files
@@ -147,7 +137,7 @@ other files submitted from a directory:
 ```shell
 $ echo 'Here is the text content that will be processed by dart' > /input-dir/file-1.txt
 $ echo '{"tenants":["tenant-1","tenant-2],"labels":["some label"]}' > /input-dir/file-1.meta
-$ dart -p prod -e wm forklift submit --input-dir /input-dir
+$ dart -p prod forklift submit --input-dir /input-dir
 ```
 
 Per-file metadata (`.meta`) can be ignored by using the `--ignore-meta-files` flag.
@@ -167,7 +157,7 @@ $ echo '{"tenants":["tenant-1"],"labels":["label-1"]}' > /input-dir/file-1.meta
 $ echo 'Second document to be processed by dart' > /input-dir/file-2.txt
 $ echo '{"tenants":["tenant-2"],"labels":["label-2"]}' > /input-dir/file-1.meta
 
-$ dart -p prod -e wm \
+$ dart -p prod \
        forklift submit \
           --tenant common-tenant-2 \
           --label common-label-2 \
@@ -187,7 +177,7 @@ The commands above will result in the following documents:
 ### CDR Archive
 
 ```shell
-$ dart -p prod -e wm retrieve cdr-archive -o wm-cdr-archive.zip
+$ dart -p prod retrieve cdr-archive -o wm-cdr-archive.zip
 ```
 
 ### CDRs
@@ -195,7 +185,7 @@ $ dart -p prod -e wm retrieve cdr-archive -o wm-cdr-archive.zip
 To retrieve one or more individual cdrs:
 
 ```shell
-$ dart -p prod -e wm retrieve cdrs \
+$ dart -p prod retrieve cdrs \
     -o /path/to/output/dir \
     c9adf7f0eba6570ab09382ce02139286 \
     945bcecff5e8d7dc66332824fdeb2a3e
@@ -207,7 +197,7 @@ To retrieve cdrs using doc ids saved to a file:
 # ids file must contain line-separated doc ids
 $ echo c9adf7f0eba6570ab09382ce02139286 > ids.txt
 $ echo 945bcecff5e8d7dc66332824fdeb2a3e >> ids.txt
-$ dart -p prod -e wm retrieve cdrs \
+$ dart -p prod retrieve cdrs \
     -f ids.txt \
     -o /path/to/output/dir
 ```
@@ -218,7 +208,7 @@ Retrieving raw documents works the same way as cdrs, but with `retrieve raws` in
 of `retrieve cdrs`:
 
 ```shell
-$ dart -p prod -e wm retrieve raws \
+$ dart -p prod retrieve raws \
     -o /path/to/output/dir \
     c9adf7f0eba6570ab09382ce02139286 \
     945bcecff5e8d7dc66332824fdeb2a3e
@@ -228,7 +218,7 @@ or
 # ids file must contain line-separated doc ids
 $ echo c9adf7f0eba6570ab09382ce02139286 > ids.txt
 $ echo 945bcecff5e8d7dc66332824fdeb2a3e >> ids.txt
-$ dart -p prod -e wm retrieve raws \
+$ dart -p prod retrieve raws \
     -f ids.txt \
     -o /path/to/output/dir
 ```
@@ -261,6 +251,7 @@ $ dart corpex search -f query-file.json \
 ````
 
 To page through the top 15 results, five at a time:
+
 ```shell
 $ dart corpex search -f query-file.json \
                      --page-size 5 \
@@ -279,7 +270,7 @@ If you just want to know how many docs match a search, use `corpex count`:
 
 ```shell
 $ dart corpex count -f query-file.json \
-                    -tenant some-tenant-id
+                    --tenant some-tenant-id
 ```
 
 ### Shave
@@ -290,11 +281,11 @@ command:
 To write the top 5000 results to a file:
 
 ```shell
-$ dart -p prod -e wm corpex shave -f query-file.json 5000 > doc-ids.txt
+$ dart -p prod corpex shave -f query-file.json 5000 > doc-ids.txt
 ```
 to retrieve the documents, you can use the generated file as an input to `retrieve cdrs`:
 ```shell
-$ dart -p prod -e wm retrieve cdrs -f doc-ids.txt -o /shaved-cdrs-dir
+$ dart -p prod retrieve cdrs -f doc-ids.txt -o /shaved-cdrs-dir
 ```
 
 ## Deployment/Provision
@@ -383,37 +374,37 @@ $ dart -p newenv pipeline nuke
 ### View tenants
 
 ```shell
-$ dart -p prod -e wm tenants ls
+$ dart -p prod tenants ls
 ```
 
 ### Add one or more tenants
 
 ```shell
-$ dart -p prod -e wm tenants add new-tenant
+$ dart -p prod tenants add new-tenant
 ```
 
 ### Remove one or more tenants
 
 ```shell
-$ dart -p prod -e wm tenants rm new-tenant-1 new-tenant-2
+$ dart -p prod tenants rm new-tenant-1 new-tenant-2
 ```
 
 ### View documents in tenant
 
 ```shell
-$ dart -p prod -e wm tenants docs ls
+$ dart -p prod tenants docs ls
 ```
 
 ### Add documents to tenant
 
 ```shell
-$ dart -p prod -e wm tenants docs add [DOC_ID_1, DOC_ID_2, ...]
+$ dart -p prod tenants docs add [DOC_ID_1, DOC_ID_2, ...]
 ```
 
 ### Remove documents from tenant
 
 ```shell
-$ dart -p prod -e wm tenants docs rm [DOC_ID_1, DOC_ID_2, ...]
+$ dart -p prod tenants docs rm [DOC_ID_1, DOC_ID_2, ...]
 ```
 
 ## User management
@@ -423,19 +414,19 @@ $ dart -p prod -e wm tenants docs rm [DOC_ID_1, DOC_ID_2, ...]
 To list existing users:
 
 ```shell
-$ dart -p prod -e wm users ls
+$ dart -p prod users ls
 ```
 
 To view their user data, include the `--view` flag:
 
 ```shell
-$ dart -p prod -e wm users ls --view
+$ dart -p prod users ls --view
 ```
 
 You can also view one or more users' data individually as follows:
 
 ```shell
-$ dart -p prod -e wm users view [user-name-1, user-name-2, ...]
+$ dart -p prod users view [user-name-1, user-name-2, ...]
 ```
 
 ### Add user
@@ -443,13 +434,13 @@ $ dart -p prod -e wm users view [user-name-1, user-name-2, ...]
 To add a user without any user data beyond their username:
 
 ```shell
-$ dart -p prod -e wm users add [USER_NAME]
+$ dart -p prod users add [USER_NAME]
 ```
 
 You can set user data using the command line:
 
 ```shell
-$ dart -p prod -e wm users add \
+$ dart -p prod users add \
        --first-name John \
        --last-name Doe \
        --email john.doe@email.com \
@@ -459,7 +450,7 @@ $ dart -p prod -e wm users add \
 ```
 Or you can set user data by providing the json:
 ```shell
-$ dart -p prod -e wm users add \
+$ dart -p prod users add \
        --metadata '{"first_name":"John","last_name":"Doe","email":"john.doe@email.com","groups":["tenant-id-1/leader","tenant-id-2/read-only"]}' \
        john-doe
 ```
@@ -468,7 +459,7 @@ Or via a file:
 $ echo '{"first_name":"John","last_name":"Doe","email":"john.doe@email.com","groups":["tenant-id-1/leader","tenant-id-2/read-only"]}' \
    > john-doe.json
 
-$ dart -p prod -e wm users add \
+$ dart -p prod users add \
        --metadata-file john-doe.json \
        john-doe
 ```
@@ -482,7 +473,7 @@ finally 3) the json file.
 Updating a user works the same way as `add`:
 
 ```shell
-$ dart -p prod -e wm users update john-doe --metadata-file john-doe.json
+$ dart -p prod users update john-doe --metadata-file john-doe.json
 ```
 
 Fields that are included either in json or via command line options will overwrite 
@@ -493,7 +484,7 @@ will overwrite that user's groups completely. To add a user to one or more group
 changing its existing groups, there is a separate command:
 
 ```shell
-$ dart -p prod -e wm users add-groups john-doe tenant-a/member tenant-b/leader
+$ dart -p prod users add-groups john-doe tenant-a/member tenant-b/leader
 ```
 
 ## Kafka

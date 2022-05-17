@@ -29,17 +29,13 @@ dart reprocess --input-dir ./cdrs # upload cdrs for reprocessing
 All configuration can provided via command-line arguments. Some configuration options that are common between DART
 tools can be provided at any stage of the command. E.g.,
 ```shell script
-dart --env --ssh-key ~/.ssh/id_rsa.pub provision ...
+dart --env --ssh-key id_rsa provision ...
 ```
 or
 ```shell script
-dart provision --env wm --ssh-key ~/.ssh/id_rsa.pub ...
+dart provision --env wm --ssh-key id_rsa ...
 ```
 You can see all of these global configuration options by running `dart --help`.
-
-### Deployment Environment
-
-[TODO]
 
 ### Configuration Profiles
 
@@ -69,38 +65,31 @@ $ dart profiles view dart-profile
 {
     "aws_profile": "[profilename]",
     "ssh_key": "id_rsa",
-    "tenants": [],
     "dart_env": {
-        "env_type": "default",
         "tst_env": {
             "aws_environment": "dart"
         },
-        "custom_env": {
-            "instance_mapping": {},
-            "service_mapping": {}
+        "default_env": {
+            "dart_only": false
         }
     },
     "auth_config": {
-        "auth_type": "no_auth",
         "dart_auth": {
             "username": "[dart-un]",
             "password": "[dart-pwd]",
-            "client_secret": "[dart-cli-client-secret]",
-            "use_client_secret_flag": true
+            "client_secret": "[dart-cli-client-secret]"
         },
         "basic_auth": {
             "username": "[basic-auth-un]",
             "password": "[basic-auth-pwd]"
         }
     },
-    "kafka_config": {
-        "config_type": "default"
-    },
     "docker_config": {
         "docker_username": "[docker-un]",
         "docker_password": "[docker-pwd]"
     }
 }
+
 ```
 
 Since `dart profiles add` simply writes the current dart-cli configuration to a configuration profile, it is easy
@@ -126,32 +115,24 @@ dart -p dart-profile \
 {
     "aws_profile": "[profilename]",
     "ssh_key": "id_rsa",
-    "tenants": [],
     "dart_env": {
-        "env_type": "default",
         "tst_env": {
             "aws_environment": "dart"
         },
-        "custom_env": {
-            "instance_mapping": {},
-            "service_mapping": {}
+        "default_env": {
+            "dart_only": false
         }
     },
     "auth_config": {
-        "auth_type": "no_auth",
         "dart_auth": {
             "username": "[dart-un]",
             "password": "[dart-pwd]",
-            "client_secret": "[dart-cli-client-secret]",
-            "use_client_secret_flag": true
+            "client_secret": "[dart-cli-client-secret]"
         },
         "basic_auth": {
             "username": "ex-username",
             "password": "ex-password"
         }
-    },
-    "kafka_config": {
-        "config_type": "default"
     },
     "docker_config": {
         "docker_username": "[docker-un]",
@@ -162,8 +143,8 @@ dart -p dart-profile \
 
 ### Configuration workflow
 
-By building on existing profiles in this way, you can easily generate new profiles for any dart environment. The following
-is the recommended workflow for doing this.
+By building on existing profiles in this way, you can easily generate new profiles for any dart environment. The 
+following is the recommended workflow for doing this.
 
 #### 1. Global credentials
 
@@ -179,30 +160,11 @@ dart --dart-login [username]:[password] \  # credentials for dart auth using pub
      profiles add credentials
 ```
 
-#### 2. AWS environments
+#### 2. Env-specific profiles
 
-You will also want separate profiles for each of the two AWS accounts DART uses. Each of these should include the
-credentials stored in the `credentials` profile above:
-
-```shell script
-dart -p credentials \                         # Inherit credentials configuration
-     --aws-environment dart \                 # Set the dart-pipeline type that will be used for deployment
-     --aws-profile [your-dart-profile-name]\  # Set the AWS profile name that will be used to access the appropraite AWS account
-     profiles add dart                        # Create a new configuration profile with above configuration
-
-dart -p credentials \
-     --aws-environment prod \
-     --aws-profile [your-prod-profile-name] \
-     profiles add prod
-```
-
-#### 3. Env-specific profiles
-
-Finally, you will want to generate profiles for each DART environment you want to interact with, so that you do
-not have to continually use cli options to use its services.
-
-To create a profile for an environment that *does not exist yet*, simply combine the env-specific configuration
-properties with either the `dart` or `prod` profiles from above, depending on which account you intend to deploy
+Next, you will want to generate profiles for each DART environment you want to interact with, so that you do
+not have to continually use cli options to use its services. To do this, simply combine the env-specific configuration
+properties with the appropriate credentials profile (see 1 above), depending on which account you intend to deploy
 this DART environment in:
 
 ```shell script
@@ -224,13 +186,9 @@ To create a profile for an environment that *has already been deployed*, you can
 to pull the env-specific configuration from metadata stored in aws:
 
 ```shell script
-dart -p dart \            # Inherit configuration
-     --env dartenv \      # Set environment name
-     --query-metadata \   # Pull deployment profile, project id, and version from AWS
-     profiles add dartenv # Create a new profile with above configuration
+dart -p credentials \            # Inherit configuration
+     --remote [ip-address] \     # Provide hostname or IP for a remote deployment
+     --create                    # Use full CREATE deployment (see above)
+     --default-env-dir /opt/app  # Set working directory for remote deployment
+     profiles add create-env     # Create a new profile with above configuration
 ```
-
-### Local DART Environment
-
-Set the `--local` flag to use DART services deployed locally. Currently, this can only be used for DART services
-(e.g., corpex, forklift, reprocess, etc.) and not for provisioning or deployment.
