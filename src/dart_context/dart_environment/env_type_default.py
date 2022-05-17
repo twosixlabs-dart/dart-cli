@@ -14,6 +14,7 @@ class DefaultDartEnvironmentType(DartEnvironmentType):
     user: str = None
     data_dir: str = None
     version: str = None
+    dart_only: bool = False
 
     def set_host(self, new_host) -> None:
         self.host = new_host
@@ -26,6 +27,9 @@ class DefaultDartEnvironmentType(DartEnvironmentType):
 
     def set_version(self, new_version) -> None:
         self.version = new_version
+
+    def set_dart_only(self, new_dart_only: bool) -> None:
+        self.dart_only = new_dart_only
 
     __service_map = {
         'corpex': {
@@ -85,7 +89,7 @@ class DefaultDartEnvironmentType(DartEnvironmentType):
         return None
 
     def service_base_path(self, service: str, direct: bool = False) -> str:
-        base_name = service if 'base_path' not in self.__service_map[service] else self.__service_map[service]['base_name']
+        base_name = service if 'base_name' not in self.__service_map[service] else self.__service_map[service]['base_name']
         return f'/dart/api/v1/{base_name}'
 
     def service_container_name(self, service: str) -> str:
@@ -106,4 +110,5 @@ class DefaultDartEnvironmentType(DartEnvironmentType):
             'user': (lambda: self.user, lambda u: self.set_user(u)),
             'data-dir': (lambda: self.data_dir, lambda dd: self.set_data_dir(dd)),
             'version': (lambda : self.version, lambda v: self.set_version(v)),
+            'dart_only': (lambda: self.dart_only, lambda do: self.set_dart_only(do)),
         }

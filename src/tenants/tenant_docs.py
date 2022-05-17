@@ -16,7 +16,6 @@ def ls_command(context: DartContext, tenant_id):
     """Display docs belonging to a tenant"""
     base_url = get_base_url('tenants', context)
     auth_headers = generate_auth_headers(context)
-    print(base_url)
     res = requests.get(url=base_url + f'/{tenant_id}/documents', headers=auth_headers)
     if res.status_code != 200:
         print(f"Unable to retrieve documents from {tenant_id}:")

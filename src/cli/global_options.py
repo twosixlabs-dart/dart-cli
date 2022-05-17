@@ -92,42 +92,74 @@ def tst_user_option(f):
                         callback=callback)(f)
 
 
-def diab_user_option(f):
+def dart_in_a_box(f):
+    def callback(ctx, param, value):
+        state: DartContext = ctx.ensure_object(DartContext)
+        # Only mutate if flag is set
+        if value is not None and value is not False:
+            state.dart_env.default_env.set_dart_only(value)
+        return value
+    return click.option('--diab',
+                        is_eager=False,
+                        flag_value=True,
+                        default=False,
+                        expose_value=False,
+                        help='Configure for DART-in-a-box (DIAB) deployment (excludes readers and indra).',
+                        callback=callback)(f)
+
+
+def create(f):
+    def callback(ctx, param, value):
+        state: DartContext = ctx.ensure_object(DartContext)
+        # Only mutate if flag is set
+        if value is not None and value is not True:
+            state.dart_env.default_env.set_dart_only(value)
+        return value
+    return click.option('--create',
+                        is_eager=False,
+                        flag_value=False,
+                        default=True,
+                        expose_value=False,
+                        help='Configure for Causal Relations Extraction and Assembly Toolkit Ensemble (CREATE) deployment (DART + readers + assembly).',
+                        callback=callback)(f)
+
+
+def default_user_option(f):
     def callback(ctx, param, value):
         state: DartContext = ctx.ensure_object(DartContext)
         if value is not None:
             state.dart_env.default_env.set_user(value)
         return value
-    return click.option('--diab-user',
+    return click.option('--default-env-user',
                         is_eager=False,
                         expose_value=False,
-                        help='Set user for remote (ssh) deployment of Dart-in-a-Box.',
+                        help='Set user for remote (ssh) deployment of DIAB or CREATE.',
                         callback=callback)(f)
 
 
-def diab_dir_option(f):
+def default_dir_option(f):
     def callback(ctx, param, value):
         state: DartContext = ctx.ensure_object(DartContext)
         if value is not None:
             state.dart_env.default_env.set_data_dir(value)
         return value
-    return click.option('--diab-dir',
+    return click.option('--default-env-dir',
                         is_eager=False,
                         expose_value=False,
-                        help='Set working directory for local or remote deployment of Dart-in-a-Box.',
+                        help='Set working directory for local or remote deployment of DIAB or CREATE.',
                         callback=callback)(f)
 
 
-def diab_version_option(f):
+def default_version_option(f):
     def callback(ctx, param, value):
         state: DartContext = ctx.ensure_object(DartContext)
         if value is not None:
             state.dart_env.default_env.set_version(value)
         return value
-    return click.option('--diab-version',
+    return click.option('--default-env-version',
                         is_eager=False,
                         expose_value=False,
-                        help='Set Dart-in-a-Box version for deployment.',
+                        help='Set DIAB/CREATE configuration version for deployment.',
                         callback=callback)(f)
 
 
@@ -543,9 +575,11 @@ def dart_options(f):
     f = use_custom_env_option(f)
     f = remote_deployment_option(f)
     f = tst_user_option(f)
-    f = diab_user_option(f)
-    f = diab_dir_option(f)
-    f = diab_version_option(f)
+    f = dart_in_a_box(f)
+    f = create(f)
+    f = default_user_option(f)
+    f = default_dir_option(f)
+    f = default_version_option(f)
     f = local_deployment_option(f)
     f = aws_env_option(f)
     f = dart_secret_option(f)

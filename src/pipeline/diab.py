@@ -32,9 +32,16 @@ def check_data_command(context: DartContext):
     return f'[ -d  "{data_dir}/dart-es-master" ] && [ -d "{data_dir}/dart-es-replica-1" ] && [ -d "{data_dir}/dart-es-replica-2" ]'
 
 
+def dc_scale_options(ctx: DartContext):
+    if ctx.dart_env.is_default() and ctx.dart_env.default_env.dart_only:
+        return ' --scale indra=0 --scale hume-reader=0 --scale eidos=0 --scale indra-db=0'
+    return ''
+
+
 def dc_up_command(context: DartContext):
+    scale_options = dc_scale_options(context)
     proxy_host_str = f'PROXY_HOSTNAME={context.dart_env.default_env.host} ' if context.dart_env.default_env.host is not None else ''
-    return proxy_host_str + 'docker-compose up -d'
+    return proxy_host_str + 'docker-compose up -d' + scale_options
 
 def dc_pull_command():
     return 'docker-compose pull'
@@ -50,7 +57,8 @@ def deploy_diab(context: DartContext) -> None:
     user = context.dart_env.default_env.user if context.dart_env.default_env.user is not None else '$USER'
     clean_cmd = clean_command(data_root)
     init_cmd = initialize_data_command(data_root, user)
-    deploy_cmd = command_with_docker_compose(context, f'docker-compose down; {clean_cmd}; {init_cmd}; {dc_up_command(context)}')
+    pull_cmd = 'docker-compose pull'
+    deploy_cmd = command_with_docker_compose(context, f'docker-compose down; {clean_cmd}; {init_cmd}; {pull_cmd}; {dc_up_command(context)}')
     execute(context, deploy_cmd)
 
 

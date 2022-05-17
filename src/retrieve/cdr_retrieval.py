@@ -78,20 +78,30 @@ def get_cdrs(dart_context: DartContext, output, view, ext, include, exclude, ids
         suffix = '' if len(dart_context.tenants()) < 1 else f'?tenant_id={dart_context.tenants()[0]}'
         return base_url + '/' + doc_id + suffix
 
-    for doc_id in all_doc_ids:
+    for ugly_doc_id in all_doc_ids:
+        doc_id = ugly_doc_id.strip()
         file_name = doc_id + '.' + ext.strip().lstrip('. ')
         file_path = os.path.join(output, file_name)
-        with requests.get(url(doc_id), headers=auth_headers) as response:
-            response.raise_for_status()
-            ugly_json = response.text
-            json_data = json.loads(ugly_json)
-            process_cdr_data(json_data, include, exclude)
-            if view:
-                pretty_json = json.dumps(json_data, indent=4)
-                print(pretty_json)
-            else:
-                with open(file_path, 'wb') as f:
-                    f.write(json.dumps(json_data).encode('utf-8'))
+        tmp_url = url(doc_id)
+        with requests.get(tmp_url, headers=auth_headers) as response:
+            try:
+                response.raise_for_status()
+            except Exception as e:
+                print(f'Failed to retrieve {doc_id}: {str(e)}')
+                continue
+
+            try:
+                ugly_json = response.text
+                json_data = json.loads(ugly_json)
+                process_cdr_data(json_data, include, exclude)
+                if view:
+                    pretty_json = json.dumps(json_data, indent=4)
+                    print(pretty_json)
+                else:
+                    with open(file_path, 'wb') as f:
+                        f.write(json.dumps(json_data).encode('utf-8'))
+            except Exception as e:
+                print(f'Failed to parse or write {doc_id} to file: {str(e)}')
 
 
 def parse_content_disposition(header_value):
