@@ -37,7 +37,7 @@ setup(
     py_modules=['dart', 'common_options', 'dart_context'],
     entry_points=f'''
         [console_scripts]
-        {setup_data['cmd']}=cli.dart:cli
+        {setup_data['cmd']}=dart_cli.cli.dart:cli
     ''',
     install_requires=install_requires,
     setup_requires=['pytest-runner'],
