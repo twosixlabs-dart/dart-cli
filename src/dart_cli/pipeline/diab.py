@@ -12,7 +12,7 @@ def compose_file_url(context: DartContext) -> str:
     else:
         branch_segment = version.strip()
 
-    return f'https://raw.githubusercontent.com/twosixlabs-dart/dart-in-the-box/{branch_segment}/dart-standalone.yml'
+    return f'https://raw.githubusercontent.com/twosixlabs-dart/create-standalone/{branch_segment}/create-standalone.yml'
 
 
 def clean_command(data_root: str):
