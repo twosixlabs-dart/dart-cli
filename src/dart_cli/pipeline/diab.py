@@ -33,7 +33,7 @@ def check_data_command(context: DartContext):
 
 def dc_scale_options(ctx: DartContext):
     if ctx.dart_env.is_default() and ctx.dart_env.default_env.dart_only:
-        return ' --scale indra=0 --scale hume-reader=0 --scale eidos=0 --scale indra-db=0'
+        return ' --scale indra=0 --scale hume-reader=0 --scale eidos=0 --scale indra-db=0 --scale causemos-elasticsearch=0 --scale causemose=0 --scale anansi=0'
     return ''
 
 

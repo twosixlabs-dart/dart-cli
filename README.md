@@ -29,11 +29,11 @@ dart reprocess --input-dir ./cdrs # upload cdrs for reprocessing
 All configuration can provided via command-line arguments. Some configuration options that are common between DART
 tools can be provided at any stage of the command. E.g.,
 ```shell script
-dart --env --ssh-key id_rsa provision ...
+dart --env --ssh-key id_rsa pipeline provision ...
 ```
 or
 ```shell script
-dart provision --env wm --ssh-key id_rsa ...
+dart pipeline provision --env wm --ssh-key id_rsa ...
 ```
 You can see all of these global configuration options by running `dart --help`.
 
